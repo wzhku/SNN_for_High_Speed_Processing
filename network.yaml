@@ -1,0 +1,21 @@
+simulation:
+    Ts: 1.0                                      # Effectively accelerating each sample by a factor of 5
+    tSample: 300.0                               # Effectively accelerating each sample by a factor of 5
+neuron:
+    type:     SRMALPHA
+    theta:    1.0
+    tauSr:    10.0
+    tauRef:   1.0
+    scaleRef: 2
+    scaleRho: 1
+    tauRho:   1 
+training:
+    error:
+        type: NumSpikes
+        tgtSpikeRegion: {start: 0, stop: 300}    # Effectively accelerating each sample by a factor of 5
+        tgtSpikeCount: {true: 180, false: 30}
+    path:        
+        inTrain:   DvsGesture/Train/
+        inTest:    DvsGesture/Test/
+        train:     DvsGesture/train1176.txt
+        test:      DvsGesture/test288.txt
