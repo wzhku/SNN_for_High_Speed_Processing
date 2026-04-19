@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
 
-class nmnistDataset(Dataset):
+class DvsGestureDataset(Dataset):
     def __init__(self, datasetPath, sampleFile):        
         self.path = datasetPath        
         self.samples = np.loadtxt(sampleFile).astype('int')
@@ -115,7 +115,7 @@ if __name__ == '__main__':
     model_data = torch.load('model.tar', map_location=device, weights_only=True)
     net.load_state_dict(model_data['Model']['model_state_dict'])
         
-    dataset = nmnistDataset(datasetPath = netParams['training']['path']['inTest'],
+    dataset = DvsGestureDataset(datasetPath = netParams['training']['path']['inTest'],
                             sampleFile  = netParams['training']['path']['test'])
     dataloader = DataLoader(dataset=dataset, batch_size=10)
     
