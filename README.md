@@ -20,7 +20,7 @@ This repository contains the source code for the paper "Fully Integrated Memrist
 
 The core of the project is `motion_recognition.py`, which defines:
 
-* A PyTorch Dataset class (`nmnistDataset`) to load and preprocess the DVS128 Gesture data (`.mat` files).  
+* A PyTorch Dataset class (`DvsGestureDataset`) to load and preprocess the DVS128 Gesture data (`.mat` files).  
 * A `Network` class defining the SNN architecture using SlayerSNN layers (`snn.layer`, `snn.dense`, `snn.pool`). The network consists of pooling and fully connected layers.  
 * Function for plotting the confusion matrix to visualize prediction accuracy.  
 * A main execution block that loads a pre-trained model (`model.tar`), loads the test dataset, performs inference, calculates accuracy, and plots the confusion matrix.
