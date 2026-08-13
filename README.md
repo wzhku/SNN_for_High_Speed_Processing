@@ -25,11 +25,14 @@ The core of the project is `motion_recognition.py`, which defines:
 * Function for plotting the confusion matrix to visualize prediction accuracy.  
 * A main execution block that loads a pre-trained model (`model.tar`), loads the test dataset, performs inference, calculates accuracy, and plots the confusion matrix.
 
+`train.py` provides the training code. It runs the surrogate-gradient training loop with the weight and activation clamping that enforce the hardware constraints, with L2 regularization, data augmentation, and an option for Gaussian weight-noise injection.
+
 The network configuration, including simulation parameters, neuron properties, and training/testing data paths, is defined in `network.yaml`.
 
 ## **File Structure**
 
 * **`motion_recognition.py`**: Main script defining the SNN model, data loading, and evaluation logic.  
+* **`train.py`**: Training script defining the surrogate-gradient training loop.  
 * **`network.yaml`**: Configuration file for simulation, neuron, and dataset parameters. 
 * **`model.tar`**: Contains the pre-trained model weights.  
 * [**`DvsGesture.zip`**](https://drive.google.com/file/d/1CGMGjbJekY8cenA6CUTOx6XSolWYH0Gx/view?usp=sharing): Contains the DVS128 Gesture dataset (`.mat` files) and sample lists (`.txt` files).
@@ -38,6 +41,7 @@ The network configuration, including simulation parameters, neuron properties, a
 
 * Python  
 * PyTorch  
+* Torchvision  
 * NumPy  
 * SciPy
 * Matplotlib
@@ -50,7 +54,7 @@ pip install numpy scipy matplotlib
 
 The installation method of SLAYER library (`slayerSNN`) is available [here](https://github.com/bamsumit/slayerPytorch). 
 
-The main script `motion_recognition.py` has been tested with Python 3.12 and CUDA 12.4.
+The scripts have been tested with Python 3.12 and CUDA 12.4.
 
 ## **Dataset**
 
@@ -84,6 +88,11 @@ Network and simulation parameters are controlled via `network.yaml`:
    python motion_recognition.py
    ```
    This will load the pre-trained model `model.tar` and the test data, run the network, print testing statistics (loss, accuracy), and display a confusion matrix showing the classification performance.
+5. **Train the Model:** To train the network from scratch, execute:
+   ```Bash
+   python train.py
+   ```
+   Checkpoints are written to `runs/dvsgesture/`, where `model.tar` holds the best test accuracy reached so far.
 
 ## **Model Architecture**
 

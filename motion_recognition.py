@@ -13,10 +13,11 @@ import matplotlib.ticker as ticker
 
 
 class DvsGestureDataset(Dataset):
-    def __init__(self, datasetPath, sampleFile):        
+    def __init__(self, datasetPath, sampleFile, transform=None):        
         self.path = datasetPath        
         self.samples = np.loadtxt(sampleFile).astype('int')
-            
+        self.transform = transform
+                            
     def __getitem__(self, index):
         inputIndex  = self.samples[index, 0]
         classLabel  = self.samples[index, 1]
@@ -27,13 +28,21 @@ class DvsGestureDataset(Dataset):
         desiredClass = torch.zeros((11, 1, 1, 1))
         desiredClass[classLabel, ...] = 1
         
+        if self.transform is not None:            
+            inputSpikes = torch.permute(self.transform(torch.permute(inputSpikes, (3, 0, 1, 2))), (1, 2, 3, 0))
+        
         return inputSpikes, desiredClass, classLabel
 
     def __len__(self):
         return self.samples.shape[0]
 
+def weightConstraint(bound, weightNoise=None):    
+    if weightNoise is None:
+        return lambda weight: torch.clamp(weight, -bound, bound)
+    return lambda weight: weightNoise(torch.clamp(weight, -bound, bound))
+
 class Network(torch.nn.Module):
-    def __init__(self, netParams):
+    def __init__(self, netParams, weightNoise=None):
         super(Network, self).__init__()
         
         slayer = snn.layer(netParams['neuron'], netParams['simulation'])
@@ -45,9 +54,12 @@ class Network(torch.nn.Module):
         self.pad = lambda input: F.pad(input, (0, 0, 6, 6, 6, 6))
         self.pool1 = slayer.pool(7)
         
-        self.fc1   = slayer.dense(800, 480, preHookFx=lambda input: torch.clamp(input, -5, 5))
-        self.fc2   = slayer.dense(480, 120, preHookFx=lambda input: torch.clamp(input, -5, 5))        
-        self.fc    = slayer.dense(120, 11,  preHookFx=lambda input: torch.clamp(input, -3, 3))
+        self.weightNoise = weightNoise
+        # Registered as a submodule, so net.train() / net.eval() enable and disable it.
+                
+        self.fc1   = slayer.dense(800, 480, preHookFx=weightConstraint(5, weightNoise))
+        self.fc2   = slayer.dense(480, 120, preHookFx=weightConstraint(5, weightNoise))        
+        self.fc    = slayer.dense(120, 11,  preHookFx=weightConstraint(3, weightNoise))
         # Apply weight clamping to mitigate the impact of RRAM conductivity fluctuations when performing inference on hardware
         
         self.clamp = lambda input: torch.clamp(input, 0, 5)
